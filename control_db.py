@@ -12,10 +12,19 @@ def init_db():
                                                                 text TEXT NOT NULL,
                                                                 FOREIGN KEY (user) REFERENCES users(id))""")
     connection.commit()
+
+# Функция возвращает количество задач у определенного юзера
+def count_number_in_tasklist(user):
+    connection = sqlite3.connect("database.db")
+    cursor = connection.cursor()
+    select_count_number = cursor.execute(f"""SELECT Count(*) FROM 'tasklist' WHERE user='{user}'""")
+    for i in select_count_number:
+        count_number = int(re.findall('\d+', str(i))[0])
+    return count_number
     
  # Функция добавляет нового пользователя в таблицу users
 def add_to_users(id):
-    insert = f"""INSERT INTO 'users'  VALUES ('{id}')"""
+    insert = f"""INSERT OR IGNORE INTO 'users'  VALUES ('{id}')"""
     connection = sqlite3.connect("database.db")
     cursor = connection.cursor()
     cursor.execute(insert)
@@ -26,9 +35,7 @@ def add_to_users(id):
 def add_to_tasklist(user, text):
     connection = sqlite3.connect("database.db")
     cursor = connection.cursor()
-    select = cursor.execute(f"""SELECT Count(*) FROM 'tasklist' WHERE user='{user}'""")
-    for i in select:
-        number = int(re.findall('\d+', str(i))[0]) + 1
+    number = count_number_in_tasklist(user) + 1
     insert = f"""INSERT INTO 'tasklist'  VALUES ('{user}','{number}','{text}')"""
     cursor.execute(insert)
     connection.commit()
@@ -56,10 +63,7 @@ def delete_task(user, number):
 def update_tasklist(user, number):
     connection = sqlite3.connect("database.db")
     cursor = connection.cursor()
-    #выделяем количество записей
-    select_count_number = cursor.execute(f"""SELECT Count(*) FROM 'tasklist' WHERE user='{user}'""")
-    for i in select_count_number:
-        count_number = int(re.findall('\d+', str(i))[0])
+    count_number = count_number_in_tasklist(user)
     #ставим флаг
     flag = count_number - number + 1
     for i in range(0, flag):
@@ -70,53 +74,3 @@ def update_tasklist(user, number):
         connection.commit()
         number+=1
 
-
-
-# def update_tasklist(user, number):
-#     connection = sqlite3.connect("database.db")
-#     cursor = connection.cursor()
-#     old_numbers = []
-#     new_numbers = []
-#     select_numbers = cursor.execute(f"""SELECT number FROM tasklist WHERE user='{user}'""")
-#     for i in select_numbers:
-#         old_numbers.append(i[0])
-#     for i in range(0, len(old_numbers)):
-#         if old_numbers[i]>number:
-#             new_numbers.append(old_numbers[i]-1)
-#     return old_numbers, new_numbers
-
-
-    # new_number = []
-    # connection = sqlite3.connect("database.db")
-    # cursor = connection.cursor()
-    # select_count_number = cursor.execute(f"""SELECT Count(*) FROM 'tasklist' WHERE user='{user}'""")
-    # for i in select_count_number:
-    #     count_number = int(re.findall('\d+', str(i))[0])
-    # cursor.execute(f"""UPDATE tasklist SET number=0 WHERE user='{user}'""")
-    # for i in range(1, count_number+1):
-    #     new_number.append(i)
-    
-
-
-
-
-    # old_numbers = []
-    # new_numbers = []
-    # select_numbers = cursor.execute(f"""SELECT number FROM tasklist WHERE user='{user}'""")
-    # for i in select_numbers:
-    #     old_numbers.append(i[0])
-    # for i in range(0, len(old_numbers)):
-    #     if old_numbers[i]>number:
-    #         new_numbers.append(old_numbers[i]-1)
-    # for i in range(0, len(new_numbers)):
-    #     update = f"""UPDATE tasklist SET number='{new_numbers[i]}' WHERE number>'{new_numbers[i]}' AND user='{user}'"""
-    #     cursor.execute(update)
-    #     connection.commit()
-
-    # select_count_number = cursor.execute(f"""SELECT Count(*) FROM 'tasklist' WHERE user='{user}'""")
-    # for i in select_count_number:
-    #     count_number = int(re.findall('\d+', str(i))[0])
-    # for i in range(1, count_number+1):
-    #     update = f"""UPDATE tasklist SET number='{i}' WHERE user='{user}' AND number>'{i}'"""
-    #     cursor.execute(update)
-    #     connection.commit()
