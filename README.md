@@ -17,7 +17,7 @@ Test task for ufanet
 
 — pyTelegramBotAPI
 
-— SQLite
+— Postgresql(psycopg2)
 
 # Установка и запуск
 
